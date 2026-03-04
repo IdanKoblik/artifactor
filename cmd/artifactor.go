@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"context"
 	"strings"
 
+	"artifactor/internal/sql"
 	"artifactor/internal/config"
 	"artifactor/internal/logging"
 )
@@ -46,12 +48,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	logging.Log.Debugf("Max file size that can be uploaded: %d\n", cfg.FileUploadLimit)
+	logging.Log.Debugf("Max file size that can be uploaded: %d MB\n", cfg.FileUploadLimit)
 	logging.Log.Info("Connecting to pgsql database.")
 	logging.Log.Debugf("Username: %s", cfg.Sql.Username)
 	logging.Log.Debugf("Password: %s", strings.Repeat("*", len(cfg.Sql.Password)))
 	logging.Log.Debugf("Addr: %s", cfg.Sql.Addr)
 	logging.Log.Debugf("Database: %s\n", cfg.Sql.Database)
+
+	err = sql.OpenConnection(&cfg.Sql)
+	if err != nil {
+		logging.Log.Error("Failed to connect to pgsql database")
+		os.Exit(1)
+	}
+
+	defer sql.Conn.Close(context.Background())
+	logging.Log.Info("Successfully connected to pgsql database!\n")
 
 	logging.Log.Info("Connecting to redis database.")
 	logging.Log.Debugf("Addr: %s", cfg.Redis.Addr)

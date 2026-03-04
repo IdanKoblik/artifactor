@@ -14,11 +14,11 @@ func TestOpenConnection_Sucess(t *testing.T) {
 	cfg, err := config.ParseConfig(path)
 	assert.NoError(t, err)
 
-	conn, err := OpenConnection(&cfg.Sql)
+	err = OpenConnection(&cfg.Sql)
 	assert.NoError(t, err)
-	assert.NotNil(t, conn)
+	assert.NotNil(t, Conn)
 
-	conn.Close(context.Background())
+	Conn.Close(context.Background())
 }
 
 func TestOpenConnection_Invalid(t *testing.T) {
@@ -26,7 +26,7 @@ func TestOpenConnection_Invalid(t *testing.T) {
 	cfg, err := config.ParseConfig(path)
 	assert.NoError(t, err)
 
-	conn, err := OpenConnection(&cfg.Sql)
+	err = OpenConnection(&cfg.Sql)
 	assert.Error(t, err)
-	assert.Nil(t, conn)
+	assert.Nil(t, Conn)
 }

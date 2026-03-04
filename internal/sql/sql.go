@@ -8,7 +8,10 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func OpenConnection(cfg *config.PgsqlConfig) (*pgx.Conn, error) {
+
+var Conn *pgx.Conn
+
+func OpenConnection(cfg *config.PgsqlConfig) error {
 	u := url.URL{
 		Scheme: "postgres",
 		User:   url.UserPassword(cfg.Username, cfg.Password),
@@ -18,8 +21,9 @@ func OpenConnection(cfg *config.PgsqlConfig) (*pgx.Conn, error) {
 
 	conn, err := pgx.Connect(context.Background(), u.String())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return conn, nil
+	Conn = conn
+	return nil
 }
