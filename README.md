@@ -1,4 +1,4 @@
-# artifactor 📦
+# Artifactor 📦
 
 Robust package version management service designed to simplify the way developers handle dependencies across projects
 
