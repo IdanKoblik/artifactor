@@ -25,6 +25,7 @@ func TestParseConfig_Success(t *testing.T) {
 
 		assert.Equal(t, "localhost:6379", cfg.Redis.Addr)
 		assert.Equal(t, "", cfg.Redis.Password)
+		assert.Equal(t, 0, cfg.Redis.DB)
 	}
 }
 

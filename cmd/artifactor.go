@@ -7,6 +7,7 @@ import (
 	"context"
 	"strings"
 
+	"artifactor/internal/redis"
 	"artifactor/internal/sql"
 	"artifactor/internal/config"
 	"artifactor/internal/logging"
@@ -58,7 +59,7 @@ func main() {
 
 	err = sql.OpenConnection(&cfg.Sql)
 	if err != nil {
-		logging.Log.Error("Failed to connect to pgsql database")
+		logging.Log.Error("Failed to connect to pgsql database\n", err)
 		os.Exit(1)
 	}
 
@@ -68,6 +69,15 @@ func main() {
 	logging.Log.Info("Connecting to redis database.")
 	logging.Log.Debugf("Addr: %s", cfg.Redis.Addr)
 	logging.Log.Debugf("Password: %s", generatePasswordMask())
+
+	err = redis.OpenConnection(&cfg.Redis)
+	if err != nil {
+		logging.Log.Error("Failed to connect to redis database\n", err)
+		os.Exit(1)
+	}
+
+	defer redis.Client.Close()
+	logging.Log.Info("Successfully connected to redis database!\n")
 }
 
 func generatePasswordMask() string {

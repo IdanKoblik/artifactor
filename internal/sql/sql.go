@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"fmt"
 	"context"
 	"net/url"
 	"artifactor/pkg/config"
@@ -9,9 +10,14 @@ import (
 )
 
 
-var Conn *pgx.Conn
+var Conn *pgx.Conn = nil
 
 func OpenConnection(cfg *config.PgsqlConfig) error {
+	Conn = nil
+	if cfg == nil {
+		return fmt.Errorf("Missing pgsql config")
+	}
+
 	u := url.URL{
 		Scheme: "postgres",
 		User:   url.UserPassword(cfg.Username, cfg.Password),

@@ -9,6 +9,7 @@ type Config struct {
 type RedisConfig struct {
 	Addr string `yaml:"addr"`
 	Password string `yaml:"password,omitempty"`
+	DB int `yaml:"db,omitempty"`
 }
 
 type PgsqlConfig struct {
