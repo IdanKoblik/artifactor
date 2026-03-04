@@ -11,9 +11,13 @@ import (
 )
 
 func ParseConfig(path string) (config.Config, error) {
+	var cfg config.Config
+	if path == "" {
+		return cfg, fmt.Errorf("Config file is required!")
+	}
+
 	logging.Log.Debugf("Conifg path: %s\n", path)
 
-	var cfg config.Config
 	if !strings.HasSuffix(path, ".yml") && !strings.HasSuffix(path, ".yaml") {
 		return cfg, fmt.Errorf("Unsupported config file type")
 	}
