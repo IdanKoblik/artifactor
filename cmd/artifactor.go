@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand/v2"
 	"os"
 	"context"
 	"strings"
@@ -51,7 +52,7 @@ func main() {
 	logging.Log.Debugf("Max file size that can be uploaded: %d MB\n", cfg.FileUploadLimit)
 	logging.Log.Info("Connecting to pgsql database.")
 	logging.Log.Debugf("Username: %s", cfg.Sql.Username)
-	logging.Log.Debugf("Password: %s", strings.Repeat("*", len(cfg.Sql.Password)))
+	logging.Log.Debugf("Password: %s", generatePasswordMask())
 	logging.Log.Debugf("Addr: %s", cfg.Sql.Addr)
 	logging.Log.Debugf("Database: %s\n", cfg.Sql.Database)
 
@@ -66,5 +67,10 @@ func main() {
 
 	logging.Log.Info("Connecting to redis database.")
 	logging.Log.Debugf("Addr: %s", cfg.Redis.Addr)
-	logging.Log.Debugf("Password: %s", strings.Repeat("*", len(cfg.Redis.Password)))
+	logging.Log.Debugf("Password: %s", generatePasswordMask())
+}
+
+func generatePasswordMask() string {
+	n := rand.N(18) + 5
+	return strings.Repeat("*", n)
 }
