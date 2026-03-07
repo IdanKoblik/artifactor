@@ -15,6 +15,11 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type AuthRepoInterface interface {
+	FetchToken(rawToken string) (*tokens.Token, error)
+	CreateToken(request *http.CreateRequest) (string, error)
+}
+
 type AuthRepository struct {
 	Rdb       *redis.Client
 	SqlClient *pgx.Conn
