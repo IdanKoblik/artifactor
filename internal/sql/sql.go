@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"fmt"
 	"context"
 	"net/url"
 	"artifactor/pkg/config"
@@ -8,7 +9,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func OpenConnection(cfg *config.PgsqlConfig) (*pgx.Conn, error) {
+
+var Conn *pgx.Conn = nil
+
+func OpenConnection(cfg *config.PgsqlConfig) error {
+	Conn = nil
+	if cfg == nil {
+		return fmt.Errorf("Missing pgsql config")
+	}
+
 	u := url.URL{
 		Scheme: "postgres",
 		User:   url.UserPassword(cfg.Username, cfg.Password),
@@ -18,8 +27,9 @@ func OpenConnection(cfg *config.PgsqlConfig) (*pgx.Conn, error) {
 
 	conn, err := pgx.Connect(context.Background(), u.String())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return conn, nil
+	Conn = conn
+	return nil
 }

@@ -1,8 +1,7 @@
-package sql
+package redis
 
 import (
 	"testing"
-	"context"
 	"path/filepath"
 
 	"artifactor/internal/config"
@@ -11,8 +10,8 @@ import (
 
 func TestOpenConnection_MissingConfig(t *testing.T) {
 	err := OpenConnection(nil)
-	assert.Nil(t, Conn)
-	assert.EqualError(t, err, "Missing pgsql config")
+	assert.Nil(t, Client)
+	assert.EqualError(t, err, "Missing redis config")
 }
 
 func TestOpenConnection_Sucess(t *testing.T) {
@@ -20,11 +19,11 @@ func TestOpenConnection_Sucess(t *testing.T) {
 	cfg, err := config.ParseConfig(path)
 	assert.NoError(t, err)
 
-	err = OpenConnection(&cfg.Sql)
+	err = OpenConnection(&cfg.Redis)
 	assert.NoError(t, err)
-	assert.NotNil(t, Conn)
+	assert.NotNil(t, Client)
 
-	Conn.Close(context.Background())
+	Client.Close()
 }
 
 func TestOpenConnection_Invalid(t *testing.T) {
@@ -32,8 +31,8 @@ func TestOpenConnection_Invalid(t *testing.T) {
 	cfg, err := config.ParseConfig(path)
 	assert.NoError(t, err)
 
-	cfg.Sql.Addr = "invalid"
-	err = OpenConnection(&cfg.Sql)
+	cfg.Redis.Addr = "Invalid"
+	err = OpenConnection(&cfg.Redis)
 	assert.Error(t, err)
-	assert.Nil(t, Conn)
+	assert.Nil(t, Client)
 }

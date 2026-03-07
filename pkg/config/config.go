@@ -1,8 +1,16 @@
 package config
 
 type Config struct {
-	FileUploadLimit int `yaml:"file_upload_limit"`
+	FileUploadLimit int `yaml:"file_upload_limit,omitempty"`
+
 	Sql PgsqlConfig `yaml:"sql"`
+	Redis RedisConfig `yaml:"redis"`
+}
+
+type RedisConfig struct {
+	Addr string `yaml:"addr"`
+	Password string `yaml:"password,omitempty"`
+	DB int `yaml:"db,omitempty"`
 }
 
 type PgsqlConfig struct {
