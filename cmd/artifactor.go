@@ -85,6 +85,7 @@ func main() {
 		api.PUT("/register", authHandler.HandleRegister)
 		api.DELETE("/prune/:token", authHandler.HandlePrune)
 		api.GET("/fetch/:token", authHandler.HandleFetch)
+		api.GET("/health", authHandler.HandleHealth)
 	}
 
 	addr := os.Getenv("SERVER_ADDR")

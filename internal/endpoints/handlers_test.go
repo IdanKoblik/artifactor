@@ -227,3 +227,21 @@ func TestHandlePrune_Error(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.Contains(t, w.Body.String(), "failed to delete")
 }
+
+func TestHandleHealth_Success(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodGet, "/health", nil)
+
+	handler := &AuthHandler{}
+	handler.HandleHealth(c)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "sql")
+	assert.Contains(t, w.Body.String(), "redis")
+}

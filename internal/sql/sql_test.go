@@ -24,6 +24,9 @@ func TestOpenConnection_Sucess(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, Conn)
 
+	err = CheckHealth()
+	assert.NoError(t, err)
+
 	Conn.Close(context.Background())
 }
 
@@ -36,4 +39,7 @@ func TestOpenConnection_Invalid(t *testing.T) {
 	err = OpenConnection(&cfg.Sql)
 	assert.Error(t, err)
 	assert.Nil(t, Conn)
+
+	err = CheckHealth()
+	assert.Error(t, err)
 }
