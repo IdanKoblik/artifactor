@@ -33,3 +33,21 @@ func OpenConnection(cfg *config.PgsqlConfig) error {
 	Conn = conn
 	return nil
 }
+
+func CheckHealth() error {
+	if Conn == nil {
+		return fmt.Errorf("PostgreSQL connection is not initialized")
+	}
+
+	var result int
+	err := Conn.QueryRow(context.Background(), "SELECT 1").Scan(&result)
+	if err != nil {
+		return fmt.Errorf("PostgreSQL health check failed: %w", err)
+	}
+
+	if result != 1 {
+		return fmt.Errorf("PostgreSQL health check returned unexpected result: %d", result)
+	}
+
+	return nil
+}

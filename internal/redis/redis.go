@@ -22,7 +22,12 @@ func OpenConnection(cfg *config.RedisConfig) error {
 		DB: cfg.DB,
 	})
 
-	if err := Client.Ping(context.Background()).Err(); err != nil {
+	return CheckHealth()
+}
+
+func CheckHealth() error {
+	err := Client.Ping(context.Background()).Err()
+	if err != nil {
 		Client = nil
 		return fmt.Errorf("Failed to ping redis: %v", err)
 	}
