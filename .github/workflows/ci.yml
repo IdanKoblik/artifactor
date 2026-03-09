@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. v1.0.0)"
+        required: true
+        default: "v1.0.0"
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+
+  build-artifact:
+    needs: test
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+
+  coverage-release:
+    needs: test
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/release.yml
+    with:
+      version: ${{ inputs.version || 'v1.0.0' }}
+    secrets: inherit

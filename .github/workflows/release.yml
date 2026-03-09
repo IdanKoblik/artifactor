@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Release version (e.g. v1.0.0)"
+        required: true
+        type: string
+
+jobs:
+  coverage-release:
+    name: Coverage, Release & GHCR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Start services
+        run: docker compose up -d
+
+      - name: Wait for services to be healthy
+        run: |
+          until docker exec postgres_db pg_isready -U admin; do sleep 1; done
+          until docker exec redis redis-cli ping; do sleep 1; done
+
+      - name: Apply database schema
+        run: docker exec -i postgres_db psql -U admin -d artifactor < scheme.sql
+
+      - name: Run coverage (unit + integration)
+        run: make cover-integration
+
+      - name: Tear down services
+        if: always()
+        run: docker compose down
+
+      - name: Parse coverage percentage
+        id: cov
+        run: |
+          TOTAL=$(go tool cover -func=coverage.out | grep '^total:' | awk '{print $3}' | tr -d '%')
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          PASS=$(awk "BEGIN { print ($TOTAL > 80) ? \"true\" : \"false\" }")
+          echo "pass=$PASS" >> $GITHUB_OUTPUT
+          echo "Coverage: $TOTAL%"
+
+      - name: Upload to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.out
+          format: golang
+
+      - name: Fail if coverage below 80%
+        if: steps.cov.outputs.pass != 'true'
+        run: |
+          echo "::error::Coverage ${{ steps.cov.outputs.total }}% is below the 80% threshold. Skipping release."
+          exit 1
+
+      - name: Build binary
+        run: make build
+
+      - name: Prepare binary for Docker build context
+        run: cp bin/artifactor artifactor
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ inputs.version }}
+            ghcr.io/${{ github.repository }}:latest
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: Release ${{ inputs.version }}
+          files: bin/artifactor
+          generate_release_notes: true
