@@ -51,7 +51,6 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           file: coverage.out
-          format: golang
 
       - name: Fail if coverage below 80%
         if: steps.cov.outputs.pass != 'true'
