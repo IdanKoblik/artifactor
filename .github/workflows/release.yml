@@ -47,11 +47,6 @@ jobs:
           echo "pass=$PASS" >> $GITHUB_OUTPUT
           echo "Coverage: $TOTAL%"
 
-      - name: Upload to Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          file: coverage.out
-
       - name: Fail if coverage below 80%
         if: steps.cov.outputs.pass != 'true'
         run: |
