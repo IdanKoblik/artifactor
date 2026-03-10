@@ -28,12 +28,14 @@ jobs:
       - name: Apply database schema
         run: docker exec -i postgres_db psql -U admin -d artifactor < scheme.sql
 
-      - name: Run unit tests
-        run: make test-unit
-
-      - name: Run integration tests
-        run: make test
+      - name: Run tests with coverage
+        run: make cover-integration
 
       - name: Tear down services
         if: always()
         run: docker compose down
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          file: coverage.out
