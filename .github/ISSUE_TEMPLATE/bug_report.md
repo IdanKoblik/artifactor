@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: enhancement
+labels: bug, enhancement
 assignees: IdanKoblik
 
 ---
@@ -27,7 +27,7 @@ assignees: IdanKoblik
 
 - OS: 
 - Golang version: 
-- Mysql version:
+- Mongodb version:
 - Redis version:
 
 ## Additional Context
