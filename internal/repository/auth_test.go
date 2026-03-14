@@ -1,11 +1,11 @@
 package repository_test
 
 import (
+	"artifactor/pkg"
 	"testing"
 
 	"artifactor/internal/helpers"
 	requests "artifactor/pkg/http"
-	"artifactor/pkg/tokens"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,7 +15,7 @@ func TestCreateToken_Success(t *testing.T) {
 	repo, cleanup := helpers.SetupRepo(t)
 	defer cleanup()
 
-	req := &requests.RegisterRequest{Admin: false, Products: []tokens.Product{}}
+	req := &requests.RegisterRequest{Admin: false, Products: []pkg.TokenProduct{}}
 	token, err := repo.CreateToken(req)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, token)
@@ -29,7 +29,7 @@ func TestFetchToken_Success(t *testing.T) {
 
 	req := &requests.RegisterRequest{
 		Admin:    false,
-		Products: []tokens.Product{{Name: "test-product"}},
+		Products: []pkg.TokenProduct{{Name: "test-product"}},
 	}
 	token, err := repo.CreateToken(req)
 	require.NoError(t, err)

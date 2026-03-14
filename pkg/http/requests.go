@@ -1,10 +1,10 @@
 package http
 
 import (
-	"artifactor/pkg/tokens"
+	"artifactor/pkg"
 )
 
 type RegisterRequest struct {
-	Admin    bool             `json:"admin"`
-	Products []tokens.Product `json:"products"`
+	Admin    bool               `json:"admin"`
+	Products []pkg.TokenProduct `json:"products"`
 }

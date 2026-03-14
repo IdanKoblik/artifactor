@@ -1,8 +1,8 @@
-package endpoints
+package auth
 
 import (
+	"artifactor/pkg"
 	pkghttp "artifactor/pkg/http"
-	"artifactor/pkg/tokens"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -11,12 +11,12 @@ type mockRepo struct {
 	mock.Mock
 }
 
-func (m *mockRepo) FetchToken(rawToken string) (*tokens.ApiToken, error) {
+func (m *mockRepo) FetchToken(rawToken string) (*pkg.ApiToken, error) {
 	args := m.Called(rawToken)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*tokens.ApiToken), args.Error(1)
+	return args.Get(0).(*pkg.ApiToken), args.Error(1)
 }
 
 func (m *mockRepo) PruneToken(rawToken string) error {

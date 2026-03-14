@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"artifactor/pkg"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -8,7 +9,6 @@ import (
 
 	"artifactor/internal/repository"
 	requests "artifactor/pkg/http"
-	"artifactor/pkg/tokens"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -39,12 +39,12 @@ func (m *MockAuthRepo) IsAdmin(rawToken string) (bool, error) {
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockAuthRepo) FetchToken(rawToken string) (*tokens.ApiToken, error) {
+func (m *MockAuthRepo) FetchToken(rawToken string) (*pkg.ApiToken, error) {
 	args := m.Called(rawToken)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*tokens.ApiToken), args.Error(1)
+	return args.Get(0).(*pkg.ApiToken), args.Error(1)
 }
 
 func TestAuthMiddleware_MissingHeader(t *testing.T) {

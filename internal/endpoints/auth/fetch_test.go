@@ -1,7 +1,7 @@
-package endpoints
+package auth
 
 import (
-	"artifactor/pkg/tokens"
+	"artifactor/pkg"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -77,7 +77,7 @@ func TestHandleFetch_Success(t *testing.T) {
 	c.Set("admin", true)
 	c.Params = gin.Params{{Key: "token", Value: "sometoken"}}
 
-	expectedToken := &tokens.ApiToken{Token: "hashedtoken", Admin: true}
+	expectedToken := &pkg.ApiToken{Token: "hashedtoken", Admin: true}
 	repo := &mockRepo{}
 	repo.On("FetchToken", "sometoken").Return(expectedToken, nil)
 

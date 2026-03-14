@@ -1,4 +1,4 @@
-package endpoints
+package auth
 
 import (
 	pkghttp "artifactor/pkg/http"

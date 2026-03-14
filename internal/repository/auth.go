@@ -2,12 +2,13 @@ package repository
 
 import (
 	"artifactor/internal/utils"
+	"artifactor/pkg"
 	"context"
+	"errors"
 	"time"
 
 	"artifactor/pkg/config"
 	requests "artifactor/pkg/http"
-	"artifactor/pkg/tokens"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -20,7 +21,7 @@ type IAuthRepo interface {
 	CreateToken(request *requests.RegisterRequest) (string, error)
 	PruneToken(rawToken string) error
 	IsAdmin(rawToken string) (bool, error)
-	FetchToken(rawToken string) (*tokens.ApiToken, error)
+	FetchToken(rawToken string) (*pkg.ApiToken, error)
 }
 
 type AuthRepository struct {
@@ -51,21 +52,11 @@ func (r *AuthRepository) getCacheKey(token string) string {
 
 type TestableAuthRepository struct {
 	*AuthRepository
-	MockToken *tokens.ApiToken
+	MockToken *pkg.ApiToken
 	MockError error
 }
 
-func NewAuthRepositoryForTest(redisClient *redis.Client, cfg *config.Config) *TestableAuthRepository {
-	return &TestableAuthRepository{
-		AuthRepository: &AuthRepository{
-			RedisClient: redisClient,
-			Cfg:         cfg,
-			CacheTTL:    5 * time.Minute,
-		},
-	}
-}
-
-func (r *TestableAuthRepository) SetMockToken(token *tokens.ApiToken) {
+func (r *TestableAuthRepository) SetMockToken(token *pkg.ApiToken) {
 	r.MockToken = token
 }
 
@@ -73,7 +64,7 @@ func (r *TestableAuthRepository) SetMockError(err error) {
 	r.MockError = err
 }
 
-func (r *TestableAuthRepository) FetchToken(rawToken string) (*tokens.ApiToken, error) {
+func (r *TestableAuthRepository) FetchToken(rawToken string) (*pkg.ApiToken, error) {
 	hashedToken := utils.Hash(rawToken)
 	_, err := r.RedisClient.Get(context.Background(), r.getCacheKey(hashedToken)).Result()
 	if err != nil {
@@ -97,7 +88,7 @@ func (r *AuthRepository) CreateToken(request *requests.RegisterRequest) (string,
 
 	token := uuid.NewString()
 	hashedToken := utils.Hash(token)
-	apiToken := tokens.ApiToken{
+	apiToken := pkg.ApiToken{
 		Token:    hashedToken,
 		Admin:    request.Admin,
 		Products: request.Products,
@@ -144,7 +135,7 @@ func (r *AuthRepository) PruneToken(rawToken string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err = collection.DeleteMany(ctx, bson.M{"_id": utils.Hash(rawToken)})
+	_, err = collection.DeleteOne(ctx, bson.M{"_id": utils.Hash(rawToken)})
 	if err != nil {
 		return err
 	}
@@ -152,7 +143,7 @@ func (r *AuthRepository) PruneToken(rawToken string) error {
 	return nil
 }
 
-func (r *AuthRepository) FetchToken(rawToken string) (*tokens.ApiToken, error) {
+func (r *AuthRepository) FetchToken(rawToken string) (*pkg.ApiToken, error) {
 	hashedToken := utils.Hash(rawToken)
 	_, err := r.RedisClient.Get(context.Background(), r.getCacheKey(hashedToken)).Result()
 	if err != nil {
@@ -164,9 +155,13 @@ func (r *AuthRepository) FetchToken(rawToken string) (*tokens.ApiToken, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var apiToken tokens.ApiToken
+	var apiToken pkg.ApiToken
 	err = collection.FindOne(ctx, bson.M{"_id": utils.Hash(rawToken)}).Decode(&apiToken)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 

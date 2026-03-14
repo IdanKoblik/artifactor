@@ -14,7 +14,8 @@ type RedisConfig struct {
 }
 
 type MongoConfig struct {
-	ConnectionString string `yaml:"connection_string"`
-	Database         string `yaml:"database"`
-	TokenCollection  string `yaml:"token_collection"`
+	ConnectionString  string `yaml:"connection_string"`
+	Database          string `yaml:"database"`
+	TokenCollection   string `yaml:"token_collection"`
+	ProductCollection string `yaml:"product_collection"`
 }

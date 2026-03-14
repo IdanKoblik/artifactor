@@ -1,9 +1,9 @@
-package endpoints
+package auth
 
 import (
 	"artifactor/internal/repository"
+	"artifactor/pkg"
 	"artifactor/pkg/http"
-	"artifactor/pkg/tokens"
 )
 
 type AuthRepo interface {
@@ -11,7 +11,7 @@ type AuthRepo interface {
 	CreateToken(request *http.RegisterRequest) (string, error)
 	PruneToken(token string) error
 	IsAdmin(token string) (bool, error)
-	FetchToken(token string) (*tokens.ApiToken, error)
+	FetchToken(token string) (*pkg.ApiToken, error)
 }
 
 type AuthHandler struct {

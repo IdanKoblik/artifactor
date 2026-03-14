@@ -1,6 +1,8 @@
 package main
 
 import (
+	"artifactor/internal/endpoints"
+	"artifactor/internal/endpoints/auth"
 	"context"
 	"fmt"
 	"math/rand/v2"
@@ -8,7 +10,6 @@ import (
 	"strings"
 
 	"artifactor/internal/config"
-	"artifactor/internal/endpoints"
 	"artifactor/internal/flags"
 	"artifactor/internal/logging"
 	"artifactor/internal/middleware"
@@ -73,7 +74,7 @@ func main() {
 	logging.Log.Info("Successfully connected to redis database!\n")
 
 	authRepo := repository.NewAuthRepository(redisClient, mongoClient, &cfg)
-	authHandler := endpoints.NewAuthHandler(authRepo)
+	authHandler := auth.NewAuthHandler(authRepo)
 
 	startFlagSystem(authRepo)
 	if len(os.Args) > 1 {
@@ -95,7 +96,9 @@ func main() {
 		api.PUT("/register", authHandler.HandleRegister)
 		api.DELETE("/prune/:token", authHandler.HandlePrune)
 		api.GET("/fetch/:token", authHandler.HandleFetch)
-		api.GET("/health", authHandler.HandleHealth)
+		api.GET("/health", func(c *gin.Context) {
+			endpoints.HandleHealth(c, mongoClient, redisClient)
+		})
 	}
 
 	addr := os.Getenv("SERVER_ADDR")
