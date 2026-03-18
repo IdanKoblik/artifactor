@@ -5,7 +5,7 @@
 Clone the repository and build the binary:
 
 ```bash
-git clone https://github.com/your-org/artifactor
+git clone https://github.com/IdanKoblik/artifactor
 cd artifactor
 make build
 ```
