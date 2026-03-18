@@ -9,6 +9,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleUpload godoc
+// @Summary      Upload a version artifact
+// @Description  Uploads a file as a new version of a product. Requires Upload permission. Duplicate version names are rejected.
+// @Tags         versions
+// @Accept       multipart/form-data
+// @Param        product  formData  string  true  "Product name"
+// @Param        version  formData  string  true  "Version identifier"
+// @Param        file     formData  file    true  "Artifact file"
+// @Success      201  "Version uploaded"
+// @Failure      400  {object}  map[string]string  "Invalid request or duplicate version"
+// @Failure      403  {string}  string  "Permission denied"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Security     ApiKeyAuth
+// @Router       /product/upload [post]
 func (h *ProductHandler) HandleUpload(c *gin.Context) {
 	var request types.UploadRequest
 	if err := c.ShouldBind(&request); err != nil {

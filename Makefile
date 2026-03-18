@@ -51,3 +51,11 @@ clean:
 .PHONY: run
 run: build
 	./bin/$(SERVICE_NAME)
+
+.PHONY: docs
+docs:
+	cd docs && npm install && npm run dev
+
+.PHONY: docs-build
+docs-build:
+	cd docs && npm install && npm run build

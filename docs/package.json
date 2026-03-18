@@ -1,0 +1,13 @@
+{
+  "name": "artifactor-docs",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3",
+    "vitepress-openapi": "^0.1.18"
+  }
+}

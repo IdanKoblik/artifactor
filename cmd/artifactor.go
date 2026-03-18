@@ -40,6 +40,13 @@ const RESET = "\033[0m"
 
 var BUILD_TIME string
 
+// @title           Artifactor API
+// @version         1.0.0
+// @description     Package version management service — store, retrieve, and manage versioned build artifacts.
+// @BasePath        /api
+// @securityDefinitions.apikey  ApiKeyAuth
+// @in              header
+// @name            X-Api-Token
 func main() {
 	logging.SetupLogger()
 	printBanner()
@@ -138,6 +145,7 @@ func setupProductEndpoints(authRepo repository.IAuthRepo, mongoClient *mongo.Cli
 		productApi.PUT("/modify/:action", productHandler.HandleModify)
 		productApi.POST("/upload", productHandler.HandleUpload)
 		productApi.GET("/download/:product/:version", productHandler.HandleDownload)
+		productApi.DELETE("/delete/:product/:version", productHandler.HandleDeleteVersion)
 	}
 }
 

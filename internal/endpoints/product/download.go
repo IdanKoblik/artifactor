@@ -11,6 +11,19 @@ import (
 
 const productsBaseDir = "prodcuts"
 
+// HandleDownload godoc
+// @Summary      Download a version artifact
+// @Description  Streams the artifact file for the specified product version. Requires Download permission.
+// @Tags         versions
+// @Produce      application/octet-stream
+// @Param        product  path  string  true  "Product name"
+// @Param        version  path  string  true  "Version identifier"
+// @Success      200  {file}  binary  "Artifact file"
+// @Failure      400  {string}  string  "Product or version not found"
+// @Failure      403  {string}  string  "Permission denied"
+// @Failure      500  {string}  string  "Internal server error"
+// @Security     ApiKeyAuth
+// @Router       /product/download/{product}/{version} [get]
 func (h *ProductHandler) HandleDownload(c *gin.Context) {
 	productName := c.Param("product")
 	version := c.Param("version")

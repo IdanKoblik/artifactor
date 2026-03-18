@@ -23,6 +23,31 @@ var actions = map[string]action{
 	"deleteToken":   deleteToken,
 }
 
+// HandleModify godoc
+// @Summary      Modify a product
+// @Description  Dispatches to one of three sub-actions based on the {action} path parameter.
+// @Description
+// @Description  **deleteVersion** (DELETE): Remove a version from a product.
+// @Description  Body: `{"product": "...", "version": "..."}`
+// @Description
+// @Description  **deleteToken** (DELETE): Revoke a token's access to a product.
+// @Description  Body: `{"product": "...", "token": "..."}`
+// @Description
+// @Description  **addToken** (PUT): Grant a token access to a product with specified permissions.
+// @Description  Body: `{"product": "...", "token": "...", "permissions": {...}}`
+// @Tags         products
+// @Accept       json
+// @Param        action  path  string  true  "Action to perform"  Enums(deleteVersion, deleteToken, addToken)
+// @Param        body    body  object  true  "Action-specific payload (see description)"
+// @Success      200  "Version deleted (deleteVersion)"
+// @Success      201  "Token added (addToken)"
+// @Success      204  "Token deleted (deleteToken)"
+// @Failure      400  {object}  map[string]string  "Invalid action or request body"
+// @Failure      405  {string}  string  "Method not allowed"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Security     ApiKeyAuth
+// @Router       /product/modify/{action} [delete]
+// @Router       /product/modify/{action} [put]
 func (h *ProductHandler) HandleModify(c *gin.Context) {
 	actionStr := c.Param("action")
 	action, err := parseAction(actionStr)

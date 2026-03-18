@@ -6,6 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleDelete godoc
+// @Summary      Delete a product
+// @Description  Permanently removes a product and all its metadata. Requires maintainer or admin access.
+// @Tags         products
+// @Param        product  path  string  true  "Product name"
+// @Success      204  "Product deleted"
+// @Failure      400  {string}  string  "Missing product name"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Security     ApiKeyAuth
+// @Router       /product/delete/{product} [delete]
 func (h *ProductHandler) HandleDelete(c *gin.Context) {
 	product := c.Param("product")
 	if product == "" {
