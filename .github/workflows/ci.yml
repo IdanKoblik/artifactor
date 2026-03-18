@@ -31,3 +31,9 @@ jobs:
       version: ${{ github.event.inputs.version || 'v1.0.0' }}
     secrets: inherit
 
+  deploy-docs:
+    needs: test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/docs.yml
+    secrets: inherit
+
