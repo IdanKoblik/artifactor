@@ -7,6 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleFetch godoc
+// @Summary      Fetch a product
+// @Description  Returns full product metadata including tokens and versions. Requires token access or admin privileges.
+// @Tags         products
+// @Produce      json
+// @Param        product  path  string  true  "Product name"
+// @Success      200  {object}  types.Product  "Product metadata"
+// @Failure      400  {string}  string  "Missing product name"
+// @Failure      403  {string}  string  "Permission denied"
+// @Failure      404  {string}  string  "Product not found"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Security     ApiKeyAuth
+// @Router       /product/fetch/{product} [get]
 func (h *ProductHandler) HandleFetch(c *gin.Context) {
 	productName := c.Param("product")
 	if productName == "" {

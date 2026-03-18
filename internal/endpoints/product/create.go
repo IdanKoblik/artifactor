@@ -8,6 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HandleCreate godoc
+// @Summary      Create a product
+// @Description  Creates a new product. The calling token is automatically granted full maintainer access.
+// @Tags         products
+// @Accept       json
+// @Param        request  body  types.CreateProductRequest  true  "Product details"
+// @Success      201  "Product created"
+// @Failure      400  {object}  map[string]string  "Invalid request or name"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Security     ApiKeyAuth
+// @Router       /product/create [put]
 func (h *ProductHandler) HandleCreate(c *gin.Context) {
 	var request types.CreateProductRequest
 	err := c.BindJSON(&request)
