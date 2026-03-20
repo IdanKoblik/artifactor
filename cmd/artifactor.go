@@ -17,6 +17,7 @@ import (
 	internalmongo "artifactor/internal/mongo"
 	internalredis "artifactor/internal/redis"
 	"artifactor/internal/repository"
+	"artifactor/internal/ui"
 	"artifactor/pkg/config"
 
 	"github.com/gin-gonic/gin"
@@ -95,6 +96,10 @@ func main() {
 	setupAuthEndpoints(authRepo, redisClient, mongoClient, api)
 	setupProductEndpoints(authRepo, mongoClient, &cfg, api)
 
+	if isUIEnabled() {
+		ui.SetupUI(authRepo, router)
+	}
+
 	addr := os.Getenv("SERVER_ADDR")
 	if addr == "" {
 		addr = "0.0.0.0:8080"
@@ -125,6 +130,7 @@ func setupAuthEndpoints(authRepo *repository.AuthRepository, redisClient *redis.
 		api.PUT("/register", authHandler.HandleRegister)
 		api.DELETE("/prune/:token", authHandler.HandlePrune)
 		api.GET("/fetch/:token", authHandler.HandleFetch)
+		api.GET("/tokens", authHandler.HandleListTokens)
 		api.GET("/health", func(c *gin.Context) {
 			endpoints.HandleHealth(c, mongoClient, redisClient)
 		})
@@ -141,6 +147,7 @@ func setupProductEndpoints(authRepo repository.IAuthRepo, mongoClient *mongo.Cli
 		productApi.PUT("/create", productHandler.HandleCreate)
 		productApi.DELETE("/delete/:product", productHandler.HandleDelete)
 		productApi.GET("/fetch/:product", productHandler.HandleFetch)
+		productApi.GET("/list", productHandler.HandleListProducts)
 		productApi.DELETE("/modify/:action", productHandler.HandleModify)
 		productApi.PUT("/modify/:action", productHandler.HandleModify)
 		productApi.POST("/upload", productHandler.HandleUpload)
@@ -172,4 +179,14 @@ func startFlagSystem(r *repository.AuthRepository) {
 	flags.InitFlagRegistry()
 
 	flags.RegisterFlag(flags.InitToken(r))
+	flags.RegisterFlag(flags.UIFlag())
+}
+
+func isUIEnabled() bool {
+	for _, arg := range os.Args[1:] {
+		if arg == "--ui" {
+			return true
+		}
+	}
+	return false
 }

@@ -18,7 +18,7 @@ const productsBaseDir = "prodcuts"
 // @Produce      application/octet-stream
 // @Param        product  path  string  true  "Product name"
 // @Param        version  path  string  true  "Version identifier"
-// @Success      200  {file}  binary  "Artifact file"
+// @Success      200  {file}  binary  "Artifact file — Content-Disposition: attachment; filename=\"<original filename>\""
 // @Failure      400  {string}  string  "Product or version not found"
 // @Failure      403  {string}  string  "Permission denied"
 // @Failure      500  {string}  string  "Internal server error"
@@ -43,7 +43,7 @@ func (h *ProductHandler) HandleDownload(c *gin.Context) {
 	}
 
 	permissions := product.Tokens[utils.Hash(c.GetString("token"))]
-	if !c.GetBool("admin") || !permissions.Download {
+	if !c.GetBool("admin") && !permissions.Download {
 		c.String(http.StatusForbidden, "permission denied")
 		return
 	}
@@ -66,5 +66,5 @@ func (h *ProductHandler) HandleDownload(c *gin.Context) {
 		return
 	}
 
-	c.File(v.Path)
+	c.FileAttachment(v.Path, filepath.Base(v.Path))
 }

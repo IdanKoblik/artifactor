@@ -50,7 +50,7 @@ func (h *ProductHandler) HandleDeleteVersion(c *gin.Context) {
 	}
 
 	permissions := product.Tokens[utils.Hash(c.GetString("token"))]
-	if !c.GetBool("admin") || !permissions.Delete {
+	if !c.GetBool("admin") && !permissions.Delete {
 		c.String(http.StatusForbidden, "permission denied")
 		return
 	}

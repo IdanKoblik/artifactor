@@ -36,3 +36,13 @@ go.work.sum
 # Editor/IDE
 .idea/
 .vscode/
+
+# UI build artifacts
+web/node_modules/
+internal/ui/static/assets/
+internal/ui/static/index.html
+
+# Docs build artifacts
+docs/node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/

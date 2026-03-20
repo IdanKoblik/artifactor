@@ -47,3 +47,11 @@ func (m *mockProductRepo) AddVersion(productName, version, token string, admin b
 	args := m.Called(productName, version, token, admin, v)
 	return args.Error(0)
 }
+
+func (m *mockProductRepo) ListProducts() ([]string, error) {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]string), args.Error(1)
+}

@@ -75,14 +75,14 @@ func TestHandleDeleteVersion(t *testing.T) {
 			token:   "mytoken",
 			setupMock: func(repo *mockProductRepo, _ string) {
 				repo.On("FetchProduct", "myproduct").Return(
-					productWithToken("mytoken", types.TokenPermissions{Delete: true}), nil,
+					productWithToken("mytoken", types.TokenPermissions{Delete: false}), nil,
 				)
 			},
 			wantStatus: http.StatusForbidden,
 			wantBody:   "permission denied",
 		},
 		{
-			name:    "PermissionDenied_NoDeletePermission",
+			name:    "AdminBypass_NoDeletePermission",
 			product: "myproduct",
 			version: "1.0.0",
 			admin:   boolPtr(true),
@@ -92,8 +92,8 @@ func TestHandleDeleteVersion(t *testing.T) {
 					productWithToken("mytoken", types.TokenPermissions{Delete: false}), nil,
 				)
 			},
-			wantStatus: http.StatusForbidden,
-			wantBody:   "permission denied",
+			wantStatus: http.StatusBadRequest,
+			wantBody:   "Version not found",
 		},
 		{
 			name:    "VersionNotFound",

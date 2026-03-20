@@ -13,6 +13,7 @@ type ProductRepo interface {
 	AddToken(productName, sourceToken, targetToken string, permissions types.TokenPermissions, admin bool) error
 	AddVersion(productName, version, token string, admin bool, v types.Version) error
 	DeleteVersion(productName, version, token string, admin bool) error
+	ListProducts() ([]string, error)
 }
 
 type ProductHandler struct {
