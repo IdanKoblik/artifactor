@@ -56,6 +56,12 @@ Start the server:
 CONFIG_PATH=./config.yml ./bin/artifactor
 ```
 
+To also enable the web UI:
+
+```bash
+CONFIG_PATH=./config.yml ./bin/artifactor --ui
+```
+
 By default the server listens on `0.0.0.0:8080`. Override with `SERVER_ADDR`:
 
 ```bash
@@ -69,6 +75,13 @@ A `docker-compose.yml` is included to spin up MongoDB and Redis locally:
 ```bash
 docker compose up -d
 ```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--init-admin-token` | Generates an initial admin token on first run. No-op if an admin token already exists. |
+| `--ui` | Enables the web UI served at `/ui`. Requires an admin token to log in. |
 
 ## Authentication
 

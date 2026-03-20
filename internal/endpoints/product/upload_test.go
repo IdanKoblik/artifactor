@@ -128,27 +128,28 @@ func TestHandleUpload(t *testing.T) {
 			token:    "mytoken",
 			setupMock: func(repo *mockProductRepo) {
 				repo.On("FetchProduct", "myproduct").Return(
-					productWithToken("mytoken", types.TokenPermissions{Upload: true}), nil,
+					productWithToken("mytoken", types.TokenPermissions{Upload: false}), nil,
 				)
 			},
 			wantStatus: http.StatusForbidden,
 			wantBody:   "permission denied",
 		},
 		{
-			name:     "PermissionDenied_NoUploadPermission",
-			product:  "myproduct",
-			version:  "1.0.0",
-			filename: "artifact.zip",
-			content:  "data",
-			admin:    boolPtr(true),
-			token:    "mytoken",
+			name:         "AdminBypass_NoUploadPermission",
+			product:      "myproduct",
+			version:      "1.0.0",
+			filename:     "artifact.zip",
+			content:      "data",
+			admin:        boolPtr(true),
+			token:        "mytoken",
+			needsTempDir: true,
 			setupMock: func(repo *mockProductRepo) {
 				repo.On("FetchProduct", "myproduct").Return(
 					productWithToken("mytoken", types.TokenPermissions{Upload: false}), nil,
 				)
+				repo.On("AddVersion", "myproduct", "1.0.0", "mytoken", true, mock.Anything).Return(nil)
 			},
-			wantStatus: http.StatusForbidden,
-			wantBody:   "permission denied",
+			wantStatus: http.StatusCreated,
 		},
 		{
 			name:     "VersionAlreadyExists",

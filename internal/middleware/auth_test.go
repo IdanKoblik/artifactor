@@ -46,6 +46,14 @@ func (m *MockAuthRepo) FetchToken(rawToken string) (*types.ApiToken, error) {
 	return args.Get(0).(*types.ApiToken), args.Error(1)
 }
 
+func (m *MockAuthRepo) ListTokens() ([]types.ApiToken, error) {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]types.ApiToken), args.Error(1)
+}
+
 func TestAuthMiddleware_MissingHeader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

@@ -64,7 +64,7 @@ func (h *ProductHandler) HandleUpload(c *gin.Context) {
 	}
 
 	permissions := product.Tokens[utils.Hash(c.GetString("token"))]
-	if !c.GetBool("admin") || !permissions.Upload {
+	if !c.GetBool("admin") && !permissions.Upload {
 		c.String(http.StatusForbidden, "permission denied")
 		return
 	}

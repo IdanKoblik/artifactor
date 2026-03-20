@@ -50,6 +50,14 @@ clean:
 run: build
 	./bin/$(SERVICE_NAME)
 
+.PHONY: ui-build
+ui-build:
+	cd web && npm install && npm run build
+
+.PHONY: ui-dev
+ui-dev:
+	cd web && npm install && npm run dev
+
 .PHONY: docs
 docs:
 	cd docs && npm install && npm run dev

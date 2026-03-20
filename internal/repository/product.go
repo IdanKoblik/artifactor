@@ -20,6 +20,7 @@ type IProductRepo interface {
 	AddToken(productName, sourceToken, targetToken string, permissions types.TokenPermissions, admin bool) error
 	DeleteVersion(productName, version, token string, admin bool) error
 	AddVersion(productName, version, token string, admin bool, v types.Version) error
+	ListProducts() ([]string, error)
 }
 
 type ProductRepository struct {
@@ -34,6 +35,31 @@ func NewProductRepository(mongoClient *mongo.Client, cfg *config.Config) *Produc
 		MongoDatabase: mongoClient.Database(cfg.Mongo.Database),
 		Cfg:           cfg,
 	}
+}
+
+func (r *ProductRepository) ListProducts() ([]string, error) {
+	collection := r.MongoDatabase.Collection(r.Cfg.Mongo.ProductCollection)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var products []types.Product
+	if err := cursor.All(context.Background(), &products); err != nil {
+		return nil, err
+	}
+
+	names := make([]string, len(products))
+	for i, p := range products {
+		names[i] = p.Name
+	}
+
+	return names, nil
 }
 
 func (r *ProductRepository) CreateProduct(product *types.Product) error {
@@ -73,10 +99,8 @@ func (r *ProductRepository) DeleteProduct(name, token string, admin bool) error 
 	}
 
 	permissions := product.Tokens[utils.Hash(token)]
-	if !admin || !permissions.Maintainer {
-		if !permissions.Delete {
-			return errors.New("missing delete permission")
-		}
+	if !admin && !permissions.Maintainer && !permissions.Delete {
+		return errors.New("missing delete permission")
 	}
 
 	_, err = collection.DeleteOne(ctx, bson.M{"_id": name})
@@ -117,7 +141,7 @@ func (r *ProductRepository) DeleteToken(productName, sourceToken, targetToken st
 	}
 
 	permissions := product.Tokens[utils.Hash(sourceToken)]
-	if !admin || !permissions.Maintainer {
+	if !admin && !permissions.Maintainer {
 		return errors.New("missing maintainer permission")
 	}
 
@@ -148,7 +172,7 @@ func (r *ProductRepository) AddToken(productName, sourceToken, targetToken strin
 	}
 
 	tokenPermissions := product.Tokens[utils.Hash(sourceToken)]
-	if !admin || !tokenPermissions.Maintainer {
+	if !admin && !tokenPermissions.Maintainer {
 		return errors.New("missing maintainer permission")
 	}
 
@@ -178,7 +202,7 @@ func (r *ProductRepository) DeleteVersion(productName, version, token string, ad
 	}
 
 	permissions := product.Tokens[utils.Hash(token)]
-	if !admin || !permissions.Maintainer || permissions.Delete {
+	if !admin && !permissions.Maintainer && !permissions.Delete {
 		return errors.New("missing maintainer / delete permission")
 	}
 

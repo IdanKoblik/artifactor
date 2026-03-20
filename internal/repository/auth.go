@@ -21,6 +21,7 @@ type IAuthRepo interface {
 	PruneToken(rawToken string) error
 	IsAdmin(rawToken string) (bool, error)
 	FetchToken(rawToken string) (*types.ApiToken, error)
+	ListTokens() ([]types.ApiToken, error)
 }
 
 type AuthRepository struct {
@@ -139,6 +140,26 @@ func (r *AuthRepository) PruneToken(rawToken string) error {
 	}
 
 	return nil
+}
+
+func (r *AuthRepository) ListTokens() ([]types.ApiToken, error) {
+	collection := r.MongoDatabase.Collection(r.Cfg.Mongo.TokenCollection)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var tokens []types.ApiToken
+	if err := cursor.All(context.Background(), &tokens); err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
 }
 
 func (r *AuthRepository) FetchToken(rawToken string) (*types.ApiToken, error) {

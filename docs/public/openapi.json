@@ -452,6 +452,12 @@
         "responses": {
           "200": {
             "description": "Artifact file binary.",
+            "headers": {
+              "Content-Disposition": {
+                "description": "Set to `attachment; filename=\"<original filename>\"` so the browser saves the file under its original uploaded name.",
+                "schema": { "type": "string" }
+              }
+            },
             "content": { "application/octet-stream": { "schema": { "type": "string", "format": "binary" } } }
           },
           "400": {
