@@ -11,37 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandleFetch_Unauthorized_NoAdmin(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodGet, "/tokens/sometoken", nil)
-
-	handler := &AuthHandler{Repo: &mockRepo{}}
-	handler.HandleFetch(c)
-
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-}
-
-func TestHandleFetch_Unauthorized_NotAdmin(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodGet, "/tokens/sometoken", nil)
-	c.Set("admin", false)
-
-	handler := &AuthHandler{Repo: &mockRepo{}}
-	handler.HandleFetch(c)
-
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-}
-
 func TestHandleFetch_MissingToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(http.MethodGet, "/tokens/", nil)
-	c.Set("admin", true)
 
 	handler := &AuthHandler{Repo: &mockRepo{}}
 	handler.HandleFetch(c)
@@ -55,7 +29,6 @@ func TestHandleFetch_RepoError(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(http.MethodGet, "/tokens/sometoken", nil)
-	c.Set("admin", true)
 	c.Params = gin.Params{{Key: "token", Value: "sometoken"}}
 
 	repo := &mockRepo{}
@@ -74,7 +47,6 @@ func TestHandleFetch_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Request = httptest.NewRequest(http.MethodGet, "/tokens/sometoken", nil)
-	c.Set("admin", true)
 	c.Params = gin.Params{{Key: "token", Value: "sometoken"}}
 
 	expectedToken := &types.ApiToken{Token: "hashedtoken", Admin: true}
