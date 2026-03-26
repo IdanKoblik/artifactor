@@ -259,16 +259,15 @@ func TestHandleUpload(t *testing.T) {
 	}
 }
 
-func TestHandleUpload_SuccessIncrementsMetrics(t *testing.T) {
-	dir := t.TempDir()
+func setupUploadMetricsTest(t *testing.T) (*gin.Context, *mockProductRepo) {
+	t.Helper()
 	orig, err := os.Getwd()
 	require.NoError(t, err)
-	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(orig)
+	require.NoError(t, os.Chdir(t.TempDir()))
+	t.Cleanup(func() { os.Chdir(orig) })
 
 	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = newUploadRequest(t, "myproduct", "1.0.0", "artifact.zip", "data")
 	c.Set("admin", true)
 	c.Set("token", "mytoken")
@@ -277,13 +276,17 @@ func TestHandleUpload_SuccessIncrementsMetrics(t *testing.T) {
 	repo.On("FetchProduct", "myproduct").Return(
 		productWithToken("mytoken", types.TokenPermissions{Upload: true}), nil,
 	)
+	return c, repo
+}
+
+func TestHandleUpload_SuccessIncrementsMetrics(t *testing.T) {
+	c, repo := setupUploadMetricsTest(t)
 	repo.On("AddVersion", "myproduct", "1.0.0", "mytoken", true, mock.Anything).Return(nil)
 
 	beforeSuccess := testutil.ToFloat64(metrics.ArtifactUploadsTotal.WithLabelValues("myproduct", "success"))
 	beforeBytes := testutil.ToFloat64(metrics.ArtifactUploadBytesTotal.WithLabelValues("myproduct"))
 
-	handler := &ProductHandler{Repo: repo}
-	handler.HandleUpload(c)
+	(&ProductHandler{Repo: repo}).HandleUpload(c)
 
 	assert.Equal(t, http.StatusCreated, c.Writer.Status())
 	assert.Equal(t, float64(1), testutil.ToFloat64(metrics.ArtifactUploadsTotal.WithLabelValues("myproduct", "success"))-beforeSuccess)
@@ -291,29 +294,12 @@ func TestHandleUpload_SuccessIncrementsMetrics(t *testing.T) {
 }
 
 func TestHandleUpload_ErrorIncrementsMetrics(t *testing.T) {
-	dir := t.TempDir()
-	orig, err := os.Getwd()
-	require.NoError(t, err)
-	require.NoError(t, os.Chdir(dir))
-	defer os.Chdir(orig)
-
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	c.Request = newUploadRequest(t, "myproduct", "1.0.0", "artifact.zip", "data")
-	c.Set("admin", true)
-	c.Set("token", "mytoken")
-
-	repo := &mockProductRepo{}
-	repo.On("FetchProduct", "myproduct").Return(
-		productWithToken("mytoken", types.TokenPermissions{Upload: true}), nil,
-	)
+	c, repo := setupUploadMetricsTest(t)
 	repo.On("AddVersion", "myproduct", "1.0.0", "mytoken", true, mock.Anything).Return(errors.New("db error"))
 
 	before := testutil.ToFloat64(metrics.ArtifactUploadsTotal.WithLabelValues("myproduct", "error"))
 
-	handler := &ProductHandler{Repo: repo}
-	handler.HandleUpload(c)
+	(&ProductHandler{Repo: repo}).HandleUpload(c)
 
 	assert.Equal(t, float64(1), testutil.ToFloat64(metrics.ArtifactUploadsTotal.WithLabelValues("myproduct", "error"))-before)
 }
