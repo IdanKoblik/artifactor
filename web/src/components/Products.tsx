@@ -12,9 +12,10 @@ import {
 
 interface Props {
   token: string
+  isAdmin: boolean
 }
 
-export default function Products({ token }: Props) {
+export default function Products({ token, isAdmin }: Props) {
   const [names, setNames]         = useState<string[] | null>(null)
   const [loadError, setLoadError] = useState('')
   const [loading, setLoading]     = useState(true)

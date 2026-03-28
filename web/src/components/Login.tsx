@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react'
 import { validateLogin } from '../api'
 
 interface Props {
-  onLogin: (token: string) => void
+  onLogin: (token: string, isAdmin: boolean) => void
 }
 
 export default function Login({ onLogin }: Props) {
@@ -19,8 +19,8 @@ export default function Login({ onLogin }: Props) {
     setLoading(true)
 
     try {
-      await validateLogin(trimmed)
-      onLogin(trimmed)
+      const isAdmin = await validateLogin(trimmed)
+      onLogin(trimmed, isAdmin)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {

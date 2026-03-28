@@ -55,3 +55,11 @@ func (m *mockProductRepo) ListProducts() ([]string, error) {
 	}
 	return args.Get(0).([]string), args.Error(1)
 }
+
+func (m *mockProductRepo) ListProductsByToken(hashedToken string) ([]string, error) {
+	args := m.Called(hashedToken)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]string), args.Error(1)
+}

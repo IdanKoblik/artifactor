@@ -126,7 +126,7 @@ func TestHandleLogin_InvalidToken(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
-func TestHandleLogin_NotAdmin(t *testing.T) {
+func TestHandleLogin_NonAdmin_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -136,36 +136,16 @@ func TestHandleLogin_NotAdmin(t *testing.T) {
 
 	repo := &mockAuthRepo{}
 	repo.On("FetchToken", "usertoken").Return(&types.ApiToken{Token: "hashed", Admin: false}, nil)
-	repo.On("IsAdmin", "usertoken").Return(false, nil)
 
 	h := NewUIHandler(repo)
 	h.HandleLogin(c)
 
-	assert.Equal(t, http.StatusForbidden, w.Code)
-	assert.Contains(t, w.Body.String(), "admin token required")
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), `"admin":false`)
 	repo.AssertExpectations(t)
 }
 
-func TestHandleLogin_IsAdminError(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	body, _ := json.Marshal(map[string]string{"token": "sometoken"})
-	c.Request = httptest.NewRequest(http.MethodPost, "/ui/login", bytes.NewReader(body))
-	c.Request.Header.Set("Content-Type", "application/json")
-
-	repo := &mockAuthRepo{}
-	repo.On("FetchToken", "sometoken").Return(&types.ApiToken{Token: "hashed", Admin: true}, nil)
-	repo.On("IsAdmin", "sometoken").Return(false, errors.New("redis error"))
-
-	h := NewUIHandler(repo)
-	h.HandleLogin(c)
-
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	repo.AssertExpectations(t)
-}
-
-func TestHandleLogin_Success(t *testing.T) {
+func TestHandleLogin_Admin_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
@@ -175,12 +155,11 @@ func TestHandleLogin_Success(t *testing.T) {
 
 	repo := &mockAuthRepo{}
 	repo.On("FetchToken", "admintoken").Return(&types.ApiToken{Token: "hashed", Admin: true}, nil)
-	repo.On("IsAdmin", "admintoken").Return(true, nil)
 
 	h := NewUIHandler(repo)
 	h.HandleLogin(c)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "true")
+	assert.Contains(t, w.Body.String(), `"admin":true`)
 	repo.AssertExpectations(t)
 }

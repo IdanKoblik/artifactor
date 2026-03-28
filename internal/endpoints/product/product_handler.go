@@ -14,6 +14,7 @@ type ProductRepo interface {
 	AddVersion(productName, version, token string, admin bool, v types.Version) error
 	DeleteVersion(productName, version, token string, admin bool) error
 	ListProducts() ([]string, error)
+	ListProductsByToken(hashedToken string) ([]string, error)
 }
 
 type ProductHandler struct {

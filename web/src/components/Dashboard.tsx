@@ -7,17 +7,19 @@ type Tab = 'tokens' | 'products' | 'health'
 
 interface Props {
   token: string
+  isAdmin: boolean
   onLogout: () => void
 }
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'tokens',   label: 'Tokens'   },
+const ALL_TABS: { id: Tab; label: string; adminOnly?: boolean }[] = [
+  { id: 'tokens',   label: 'Tokens',   adminOnly: true },
   { id: 'products', label: 'Products' },
   { id: 'health',   label: 'Health'   },
 ]
 
-export default function Dashboard({ token, onLogout }: Props) {
-  const [tab, setTab] = useState<Tab>('tokens')
+export default function Dashboard({ token, isAdmin, onLogout }: Props) {
+  const tabs = ALL_TABS.filter(t => !t.adminOnly || isAdmin)
+  const [tab, setTab] = useState<Tab>(isAdmin ? 'tokens' : 'products')
   const [confirmLogout, setConfirmLogout] = useState(false)
 
   return (
@@ -26,7 +28,7 @@ export default function Dashboard({ token, onLogout }: Props) {
         <div className="header-inner">
           <span className="header-title">ARTIFACTOR</span>
           <div className="header-right">
-            <span className="badge-admin">admin</span>
+            {isAdmin && <span className="badge-admin">admin</span>}
             <button className="btn btn-secondary btn-sm" onClick={() => setConfirmLogout(true)}>
               Logout
             </button>
@@ -36,7 +38,7 @@ export default function Dashboard({ token, onLogout }: Props) {
 
       <nav className="nav">
         <div className="nav-inner">
-          {TABS.map(t => (
+          {tabs.map(t => (
             <div
               key={t.id}
               className={`nav-tab${tab === t.id ? ' active' : ''}`}
@@ -50,7 +52,7 @@ export default function Dashboard({ token, onLogout }: Props) {
 
       <main className="content">
         {tab === 'tokens'   && <Tokens   token={token} />}
-        {tab === 'products' && <Products token={token} />}
+        {tab === 'products' && <Products token={token} isAdmin={isAdmin} />}
         {tab === 'health'   && <Health   token={token} />}
       </main>
 

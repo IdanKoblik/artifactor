@@ -21,6 +21,7 @@ type IProductRepo interface {
 	DeleteVersion(productName, version, token string, admin bool) error
 	AddVersion(productName, version, token string, admin bool, v types.Version) error
 	ListProducts() ([]string, error)
+	ListProductsByToken(hashedToken string) ([]string, error)
 }
 
 type ProductRepository struct {
@@ -44,6 +45,31 @@ func (r *ProductRepository) ListProducts() ([]string, error) {
 	defer cancel()
 
 	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var products []types.Product
+	if err := cursor.All(context.Background(), &products); err != nil {
+		return nil, err
+	}
+
+	names := make([]string, len(products))
+	for i, p := range products {
+		names[i] = p.Name
+	}
+
+	return names, nil
+}
+
+func (r *ProductRepository) ListProductsByToken(hashedToken string) ([]string, error) {
+	collection := r.MongoDatabase.Collection(r.Cfg.Mongo.ProductCollection)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{"tokens." + hashedToken: bson.M{"$exists": true}})
 	if err != nil {
 		return nil, err
 	}

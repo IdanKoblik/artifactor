@@ -91,16 +91,5 @@ func (h *UIHandler) HandleLogin(c *gin.Context) {
 		return
 	}
 
-	admin, err := h.repo.IsAdmin(req.Token)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	if !admin {
-		c.JSON(http.StatusForbidden, gin.H{"error": "admin token required"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"success": true, "admin": token.Admin})
 }

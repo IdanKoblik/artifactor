@@ -36,13 +36,15 @@ export interface HealthStatus {
   redis: string
 }
 
-export async function validateLogin(token: string): Promise<void> {
+export async function validateLogin(token: string): Promise<boolean> {
   const res = await fetch('/ui/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token }),
   })
   if (!res.ok) throw new Error(await extractError(res))
+  const data = await res.json()
+  return (data as { admin?: boolean }).admin === true
 }
 
 export async function listTokens(token: string): Promise<ApiToken[]> {
