@@ -20,6 +20,7 @@ services:
       MYSQL_DATABASE: packster
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./scheme.sql:/docker-entrypoint-initdb.d/scheme.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 5s
