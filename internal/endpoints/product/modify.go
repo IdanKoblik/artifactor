@@ -3,6 +3,7 @@ package product
 import (
 	"fmt"
 	"net/http"
+	"packster/internal/endpoints"
 	"packster/pkg/types"
 
 	"github.com/gin-gonic/gin"
@@ -52,10 +53,7 @@ func (h *ProductHandler) HandleModify(c *gin.Context) {
 	actionStr := c.Param("action")
 	action, err := parseAction(actionStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -75,19 +73,13 @@ func handleDeleteToken(c *gin.Context, h *ProductHandler) {
 	var request types.DeleteProductTokenRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
 	err = h.Repo.DeleteToken(request.Product, request.GroupName, c.GetString("token"), request.Token, c.GetBool("admin"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 
@@ -103,19 +95,13 @@ func handleAddToken(c *gin.Context, h *ProductHandler) {
 	var request types.AddProductTokenRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
 	err = h.Repo.AddToken(request.Product, request.GroupName, c.GetString("token"), request.Token, request.Permissions, c.GetBool("admin"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 
@@ -126,10 +112,7 @@ func handleDeleteVersion(c *gin.Context, h *ProductHandler) {
 	var request types.DeleteVersionRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -142,10 +125,7 @@ func handleDeleteVersion(c *gin.Context, h *ProductHandler) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 

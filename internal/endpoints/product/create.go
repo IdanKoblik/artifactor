@@ -2,6 +2,7 @@ package product
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 	"packster/internal/utils"
 	"packster/pkg/types"
 
@@ -23,10 +24,7 @@ func (h *ProductHandler) HandleCreate(c *gin.Context) {
 	var request types.CreateProductRequest
 	err := c.BindJSON(&request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -39,7 +37,7 @@ func (h *ProductHandler) HandleCreate(c *gin.Context) {
 	}
 
 	if err := utils.ValidateName(request.Name); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -61,10 +59,7 @@ func (h *ProductHandler) HandleCreate(c *gin.Context) {
 	})
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 

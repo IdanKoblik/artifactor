@@ -2,6 +2,7 @@ package product
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 	"packster/internal/metrics"
 	"packster/internal/utils"
 	"path/filepath"
@@ -33,10 +34,7 @@ func (h *ProductHandler) HandleDownload(c *gin.Context) {
 
 	product, err := h.Repo.FetchProduct(productName, group)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 

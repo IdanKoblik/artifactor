@@ -2,6 +2,7 @@ package product
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 	"packster/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -32,10 +33,7 @@ func (h *ProductHandler) HandleFetch(c *gin.Context) {
 
 	product, err := h.Repo.FetchProduct(productName, group)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 

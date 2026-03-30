@@ -2,6 +2,7 @@ package product
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 	"packster/internal/utils"
 	"packster/pkg/types"
 
@@ -20,10 +21,7 @@ import (
 func (h *ProductHandler) HandleAccess(c *gin.Context) {
 	products, err := h.Repo.ListProducts()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 

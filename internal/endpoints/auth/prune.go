@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,9 +33,7 @@ func (h *AuthHandler) HandlePrune(c *gin.Context) {
 
 	err := h.Repo.PruneToken(token)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		endpoints.InternalError(c, err)
 	}
 
 	c.String(http.StatusNoContent, "Successfully deleted this api token")

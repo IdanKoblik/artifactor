@@ -20,8 +20,8 @@ jobs:
 
       - name: Wait for services to be healthy
         run: |
-          echo "Waiting for MongoDB..."
-          until docker exec mongo mongosh --quiet --eval 'db.runCommand("ping").ok'; do sleep 1; done
+          echo "Waiting for MySQL..."
+          until docker exec mysql mysqladmin ping -h localhost -u root -proot --silent; do sleep 1; done
           echo "Waiting for Redis..."
           until docker exec redis redis-cli ping; do sleep 1; done
 

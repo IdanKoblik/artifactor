@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,9 +26,7 @@ func (h *AuthHandler) HandleFetch(c *gin.Context) {
 
 	token, err := h.Repo.FetchToken(rawToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		endpoints.BadRequest(c, err)
 		return
 	}
 

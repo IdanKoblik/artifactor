@@ -1,10 +1,11 @@
 package auth
 
 import (
-	requests "packster/pkg/types"
 	"errors"
 	"io"
 	"net/http"
+	"packster/internal/endpoints"
+	requests "packster/pkg/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,10 +44,7 @@ func (h *AuthHandler) HandleRegister(c *gin.Context) {
 
 	token, err := h.Repo.CreateToken(&request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 

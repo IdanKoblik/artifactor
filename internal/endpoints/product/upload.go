@@ -3,6 +3,7 @@ package product
 import (
 	"fmt"
 	"net/http"
+	"packster/internal/endpoints"
 	"packster/internal/metrics"
 	"packster/internal/utils"
 	"packster/pkg/types"
@@ -30,10 +31,7 @@ const mbInBytes = 1 << 20
 func (h *ProductHandler) HandleUpload(c *gin.Context) {
 	var request types.UploadRequest
 	if err := c.ShouldBind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -45,27 +43,24 @@ func (h *ProductHandler) HandleUpload(c *gin.Context) {
 	}
 
 	if err := utils.ValidateName(request.Product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		endpoints.BadRequest(c, err)
 		return
 	}
 
 	if err := utils.ValidateName(request.Version); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		endpoints.BadRequest(c, err)
 		return
 	}
 
 	safeFilename, err := utils.SafeFilename(request.File.Filename)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		endpoints.BadRequest(c, err)
 		return
 	}
 
 	product, err := h.Repo.FetchProduct(request.Product, request.GroupName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -96,19 +91,13 @@ func (h *ProductHandler) HandleUpload(c *gin.Context) {
 
 	err = c.SaveUploadedFile(request.File, location)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
 	checksum, err := utils.Checksum(request.File)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -131,7 +120,6 @@ func (h *ProductHandler) HandleUpload(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-
 		return
 	}
 

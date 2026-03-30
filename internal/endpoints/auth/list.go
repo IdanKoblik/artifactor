@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,9 +26,7 @@ func (h *AuthHandler) HandleListTokens(c *gin.Context) {
 
 	tokens, err := h.Repo.ListTokens()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		endpoints.InternalError(c, err)
 		return
 	}
 

@@ -3,6 +3,7 @@ package product
 import (
 	"net/http"
 	"os"
+	"packster/internal/endpoints"
 	"packster/internal/utils"
 	"path/filepath"
 	"strings"
@@ -40,10 +41,7 @@ func (h *ProductHandler) HandleDeleteVersion(c *gin.Context) {
 
 	product, err := h.Repo.FetchProduct(productName, group)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.BadRequest(c, err)
 		return
 	}
 
@@ -77,18 +75,12 @@ func (h *ProductHandler) HandleDeleteVersion(c *gin.Context) {
 	}
 
 	if err := os.Remove(absFile); err != nil && !os.IsNotExist(err) {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 
 	if err := h.Repo.DeleteVersion(productName, group, version, c.GetString("token"), c.GetBool("admin")); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-
+		endpoints.InternalError(c, err)
 		return
 	}
 

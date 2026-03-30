@@ -2,6 +2,7 @@ package product
 
 import (
 	"net/http"
+	"packster/internal/endpoints"
 	"packster/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -20,9 +21,7 @@ func (h *ProductHandler) HandleListProducts(c *gin.Context) {
 	if c.GetBool("admin") {
 		products, err := h.Repo.ListProducts()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			endpoints.InternalError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, products)
@@ -30,9 +29,7 @@ func (h *ProductHandler) HandleListProducts(c *gin.Context) {
 		hashedToken := utils.Hash(c.GetString("token"))
 		products, err := h.Repo.ListProductsByToken(hashedToken)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			endpoints.InternalError(c, err)
 			return
 		}
 		c.JSON(http.StatusOK, products)
