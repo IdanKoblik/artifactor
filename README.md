@@ -42,9 +42,9 @@ sql:
 
 # (Optional)
 gitlab:
-host: "https://gitlab.com"
-application_id: "YOUR_APPLICATION_ID"
-secert: "YOUR_SECRET"
+  host: "https://gitlab.com"
+  application_id: "YOUR_APPLICATION_ID"
+  secert: "YOUR_SECRET"
 ```
 
 ## Running
