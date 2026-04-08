@@ -10,7 +10,7 @@ import (
 
 var PgsqlConn *sql.DB
 
-func OpenPgsqlConnection(cfg *config.PgsqlConfig) error {
+func OpenPgsqlConnection(cfg *config.PgsqlConfig) (*sql.DB, error) {
 	sslMode := pq.SSLModeDisable
 	if cfg.SSL {
 		sslMode = pq.SSLModeRequire
@@ -28,15 +28,15 @@ func OpenPgsqlConnection(cfg *config.PgsqlConfig) error {
 
 	c, err := pq.NewConnectorConfig(pgsql)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	PgsqlConn = sql.OpenDB(c)
 
 	err = PgsqlConn.Ping()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return PgsqlConn, nil
 }

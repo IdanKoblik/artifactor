@@ -9,6 +9,9 @@ import (
 	"packster/internal/sql"
 	"packster/internal/config"
 	"packster/internal/logging"
+	"packster/internal/endpoints"
+
+	"github.com/gin-gonic/gin"
 )
 
 const BANNER = `
@@ -47,7 +50,7 @@ func main() {
 	logging.Log.Infof("Username: %s", cfg.Sql.User)
 	logging.Log.Infof("Password: %s", generateMask())
 
-	err = sql.OpenPgsqlConnection(&cfg.Sql)
+	_, err = sql.OpenPgsqlConnection(&cfg.Sql)
 	if err != nil {
 		logging.Log.Error(err)
 		os.Exit(1)
@@ -64,6 +67,22 @@ func main() {
 	}
 
 	logging.Log.Info("Packster is up and running!")
+
+	router := gin.Default()
+
+	addr := os.Getenv("ADDR")
+	if addr == "" {
+		addr = "0.0.0.0:8080"
+	}
+
+	api := router.Group("/api")
+	{
+		api.GET("/health", func(c *gin.Context){
+			endpoints.HandleHealth(c, sql.PgsqlConn)
+		})
+	}
+
+	router.Run(addr)
 }
 
 func printBanner() {
