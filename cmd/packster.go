@@ -6,10 +6,14 @@ import (
 	"os"
 	"math/rand/v2"
 
+	"packster/pkg/types"
+	"packster/pkg/config"
 	"packster/internal/sql"
-	"packster/internal/config"
+	internalConfig "packster/internal/config"
 	"packster/internal/logging"
 	"packster/internal/endpoints"
+	"packster/internal/endpoints/gitlab"
+	"packster/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +40,7 @@ func main() {
 	logging.SetupLogger()
 	printBanner()
 
-	cfg, err := config.ParseConfig(os.Getenv("CONFIG_PATH"))
+	cfg, err := internalConfig.ParseConfig(os.Getenv("CONFIG_PATH"))
 	if err != nil {
 		logging.Log.Error(err)
 		os.Exit(1)
@@ -75,6 +79,8 @@ func main() {
 	}
 
 	logging.Log.Debugf("Addr: %s", addr)
+
+	repo := repository.NewAccountRepo(sql.PgsqlConn)
 	api := router.Group("/api")
 	{
 		api.GET("/health", func(c *gin.Context){
@@ -82,9 +88,23 @@ func main() {
 		})
 	}
 
-	router.Run(addr)
+	auth := api.Group("/auth")
 
+	if cfg.Gitlab != nil {
+		logging.Log.Info("Setting up gitlab endpoints")
+		setupGitlabEndpoints(auth, repo, &cfg)
+	}
+
+	router.Run(addr)
 	logging.Log.Info("Packster is up and running!")
+}
+
+func setupGitlabEndpoints(authGroup *gin.RouterGroup, repo *repository.AccountRepo, cfg *config.Config) {
+	handler := gitlab.NewGitlabHandler(repo, cfg)
+	group := authGroup.Group("/gitlab")
+	{
+		group.GET("/status", handler.HandleStatus)
+	}
 }
 
 func printBanner() {

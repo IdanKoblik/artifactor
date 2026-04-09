@@ -7,7 +7,8 @@ CREATE TABLE account (
 
 CREATE TABLE host (
     id SERIAL PRIMARY KEY,
-    url VARCHAR(255) NOT NULL
+    url VARCHAR(255) NOT NULL UNIQUE,
+    host_type VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE repository (
@@ -15,7 +16,7 @@ CREATE TABLE repository (
     host INT NOT NULL,
     repository INT NOT NULL,
     owner INT NOT NULL,
-    created_at INT NOT NULL,
+    created_at TIMESTAMP  NOT NULL,
 
     FOREIGN KEY (host) REFERENCES host(id),
     FOREIGN KEY (owner) REFERENCES account(id)
@@ -57,7 +58,7 @@ CREATE TABLE token_access (
 );
 
 CREATE TABLE auth (
-    id INT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     account INT NOT NULL,
     username VARCHAR(255) NOT NULL,
     sso_id INT NOT NULL,

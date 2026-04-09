@@ -21,7 +21,7 @@ func TestParseConfig_Success(t *testing.T) {
 		sql := cfg.Sql
 		assert.Equal(t, "localhost", sql.Host)
 		assert.Equal(t, uint16(5432), sql.Port)
-		assert.Equal(t, "postgres", sql.DB)
+		assert.Equal(t, "packster", sql.DB)
 		assert.Equal(t, "root", sql.User)
 		assert.Equal(t, "root", sql.Password)
 		assert.False(t, sql.SSL)
