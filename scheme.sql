@@ -8,10 +8,12 @@ CREATE TABLE account (
 CREATE TABLE host (
     id SERIAL PRIMARY KEY,
     url VARCHAR(255) NOT NULL UNIQUE,
-    host_type VARCHAR(255) NOT NULL
+    host_type VARCHAR(255) NOT NULL,
+    application_id VARCHAR(255),
+    secret VARCHAR(255)
 );
 
-CREATE TABLE repository (
+CREATE TABLE project (
     id SERIAL PRIMARY KEY,
     host INT NOT NULL,
     repository INT NOT NULL,
@@ -22,17 +24,17 @@ CREATE TABLE repository (
     FOREIGN KEY (owner) REFERENCES account(id)
 );
 
-CREATE INDEX idx_repository_repository ON repository(repository);
+CREATE INDEX idx_project_repository ON project(repository);
 
 CREATE TABLE product (
     id SERIAL PRIMARY KEY,
     external_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     group_name VARCHAR(255) NOT NULL,
-    repository INT NOT NULL,
+    project INT NOT NULL,
     created_at TIMESTAMP NOT NULL,
 
-    FOREIGN KEY (repository) REFERENCES repository(id)
+    FOREIGN KEY (project) REFERENCES project(id)
 );
 
 CREATE INDEX idx_product_external_id ON product(external_id);
@@ -70,14 +72,14 @@ CREATE TABLE auth (
 
 CREATE TABLE permission (
     account INT NOT NULL,
-    repository INT NOT NULL,
+    project INT NOT NULL,
     can_download BOOLEAN NOT NULL,
     can_upload BOOLEAN NOT NULL,
     can_delete BOOLEAN NOT NULL,
 
-    PRIMARY KEY (account, repository),
+    PRIMARY KEY (account, project),
 
     FOREIGN KEY (account) REFERENCES account(id),
-    FOREIGN KEY (repository) REFERENCES repository(id)
+    FOREIGN KEY (project) REFERENCES project(id)
 );
 

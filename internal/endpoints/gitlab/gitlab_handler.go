@@ -1,18 +1,19 @@
 package gitlab
 
 import (
+	"database/sql"
+
 	"packster/internal/repository"
-	"packster/pkg/config"
 )
 
 type GitlabHandler struct {
 	Repo repository.IAccountRepo
-	Cfg *config.Config
+	DB   *sql.DB
 }
 
-func NewGitlabHandler(repo *repository.AccountRepo, cfg *config.Config) *GitlabHandler {
+func NewGitlabHandler(repo repository.IAccountRepo, db *sql.DB) *GitlabHandler {
 	return &GitlabHandler{
 		Repo: repo,
-		Cfg: cfg,
+		DB:   db,
 	}
 }

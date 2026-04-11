@@ -6,14 +6,15 @@ import (
 	"os"
 	"math/rand/v2"
 
-	"packster/pkg/config"
-	"packster/internal/sql"
 	internalConfig "packster/internal/config"
 	"packster/internal/logging"
 	"packster/internal/endpoints"
 	"packster/internal/endpoints/gitlab"
 	"packster/internal/repository"
+	"packster/internal/sql"
 	"packster/internal/ui"
+	"packster/internal/utils"
+	"packster/pkg/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -63,11 +64,10 @@ func main() {
 	defer sql.PgsqlConn.Close()
 	logging.Log.Info("Successfully connected to pgsql db")
 
-	if cfg.Gitlab != nil {
-		logging.Log.Info("Gitlab sso detected")
-		logging.Log.Infof("Host: %s", cfg.Gitlab.Host)
-		logging.Log.Infof("Application ID: %s", generateMask())
-		logging.Log.Infof("Secret: %s", generateMask())
+	hosts, err := utils.GetHosts(sql.PgsqlConn)
+	if err != nil {
+		logging.Log.Error(err)
+		os.Exit(1)
 	}
 
 	logging.Log.Info("Setting up rest api")
@@ -86,26 +86,42 @@ func main() {
 		api.GET("/health", func(c *gin.Context){
 			endpoints.HandleHealth(c, sql.PgsqlConn)
 		})
+		api.GET("/hosts", func(c *gin.Context){
+			endpoints.HandleHosts(c, sql.PgsqlConn)
+		})
 	}
 
 	auth := api.Group("/auth")
-
-	if cfg.Gitlab != nil {
-		logging.Log.Info("Setting up gitlab endpoints")
-		setupGitlabEndpoints(auth, repo, &cfg)
-	}
+	setupGitlabEndpoints(auth, repo, hosts)
 
 	ui.RegisterRoutes(router)
 
-	router.Run(addr)
+	err = router.Run(addr)
+	if err != nil {
+		logging.Log.Error(err)
+		os.Exit(1)
+	}
+
 	logging.Log.Info("Packster is up and running!")
 }
 
-func setupGitlabEndpoints(authGroup *gin.RouterGroup, repo *repository.AccountRepo, cfg *config.Config) {
-	handler := gitlab.NewGitlabHandler(repo, cfg)
+func setupGitlabEndpoints(authGroup *gin.RouterGroup, repo *repository.AccountRepo, hosts map[string]types.Host) {
+	hasGitlab := false
+	for _, h := range hosts {
+		if h.Type == types.Gitlab {
+			hasGitlab = true
+			logging.Log.Infof("Gitlab instance detected: %s (id: %d)", h.Url, h.Id)
+		}
+	}
+
+	if !hasGitlab {
+		logging.Log.Info("No gitlab hosts found")
+		return
+	}
+
+	handler := gitlab.NewGitlabHandler(repo, sql.PgsqlConn)
 	group := authGroup.Group("/gitlab")
 	{
-		group.GET("/status", handler.HandleStatus)
 		group.GET("/redirect", handler.HandleRedirect)
 		group.GET("/callback", handler.HandleCallback)
 	}
