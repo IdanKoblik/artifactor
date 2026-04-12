@@ -103,60 +103,28 @@ body {
   background: var(--border);
 }
 
-.btn-gitlab {
+.login-providers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-provider {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: #fc6d26;
   color: #fff;
-  border-color: #fc6d26;
   text-decoration: none;
 }
+
+.btn-gitlab { background: #fc6d26; border-color: #fc6d26; }
 .btn-gitlab:hover { background: #e8621e; border-color: #e8621e; }
 
-.gitlab-icon { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+.btn-github { background: #24292f; border-color: #444d56; }
+.btn-github:hover { background: #32383f; border-color: #555d66; }
 
-.host-picker-wrap { position: relative; }
-
-.host-picker {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  z-index: 10;
-}
-
-.host-picker-title {
-  font-size: 12px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  padding: 6px 10px 8px;
-}
-
-.host-picker-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 14px;
-  padding: 10px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-
-.host-picker-item:hover { background: rgba(255, 255, 255, 0.06); }
+.provider-icon { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
 
 /* ── Dashboard ──────────────────────────────────────────────────────────── */
 

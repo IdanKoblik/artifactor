@@ -7,6 +7,8 @@ import (
 	"packster/pkg/types"
 )
 
+var Hosts map[string]types.Host
+
 func GetHosts(sqlConn *sql.DB) (map[string]types.Host, error) {
 	if sqlConn == nil {
 		return nil, fmt.Errorf("sqlConn is nil")

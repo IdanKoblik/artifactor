@@ -11,6 +11,7 @@ import (
 	"packster/internal/requests"
 	"packster/internal/utils"
 	"packster/pkg/types"
+	gitlabtypes "packster/pkg/types/gitlab"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,16 +44,28 @@ func (h *GitlabHandler) HandleCallback(c *gin.Context) {
 		"redirect_uri":  redirectURI,
 	}
 
+	type oauthResult struct {
+		token *gitlabtypes.OauthToken
+		err   error
+	}
+
+	ch := make(chan oauthResult, 1)
 	client := &http.Client{}
-	res, err := requests.GitlabOauthToken(client, payload, host.Url)
-	if err != nil {
+
+	go func() {
+		res, err := requests.GitlabOauthToken(client, payload, host.Url)
+		ch <- oauthResult{token: res, err: err}
+	}()
+
+	result := <-ch
+	if result.err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": result.err.Error(),
 		})
 		return
 	}
 
-	user, err := requests.FetchGitlabUser(client, res.Token, host.Url)
+	user, err := requests.FetchGitlabUser(client, result.token.Token, host.Url)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

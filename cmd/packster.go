@@ -64,12 +64,6 @@ func main() {
 	defer sql.PgsqlConn.Close()
 	logging.Log.Info("Successfully connected to pgsql db")
 
-	hosts, err := utils.GetHosts(sql.PgsqlConn)
-	if err != nil {
-		logging.Log.Error(err)
-		os.Exit(1)
-	}
-
 	logging.Log.Info("Setting up rest api")
 	router := gin.Default()
 
@@ -91,6 +85,14 @@ func main() {
 		})
 	}
 
+	// TODO log
+	hosts, err := utils.GetHosts(sql.PgsqlConn)
+	if err != nil {
+		logging.Log.Error(err)
+		os.Exit(1)
+	}
+
+	utils.Hosts = hosts
 	auth := api.Group("/auth")
 	setupGitlabEndpoints(auth, repo, hosts)
 
